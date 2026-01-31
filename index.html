@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hachiko Inu ($HACHIKO) - The Legend Returns</title>
+    <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --shiba-orange: #FF9F43;
+            --sun-yellow: #FDCB6E;
+            --sky-blue: #48dbfb;
+            --pastel-purple: #a29bfe;
+            --border-black: #2d3436;
+            --hot-pink: #ff6b6b;
+            --lime-green: #badc58;
+            --white: #ffffff;
+            --cyan: #00cec9;
+        }
+
+        /* EVRENSEL KUTU MODELİ (Taşmaları önler) */
+        * { box-sizing: border-box; }
+
+        body, html {
+            margin: 0; padding: 0;
+            font-family: 'Luckiest Guy', sans-serif;
+            background-color: var(--sun-yellow);
+            overflow-x: hidden; cursor: default; scroll-behavior: smooth;
+        }
+
+        /* --- TEK PARÇA ARKA PLAN (SEAMLESS) --- */
+        body {
+            background-image: url('main-bg.png'); 
+            background-size: cover; 
+            background-position: center; 
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        /* --- KEMİK YAĞMURU STİLİ --- */
+        .bone-rain {
+            position: fixed;
+            top: -50px;
+            color: white;
+            z-index: 1; 
+            pointer-events: none; 
+            animation: fall linear forwards; 
+        }
+
+        @keyframes fall {
+            to { transform: translateY(110vh); }
+        }
+
+        /* --- 1. LOADING SCREEN --- */
+        #loading-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            background: var(--border-black); z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            color: var(--sun-yellow); transition: transform 0.8s ease-in-out;
+            padding: 20px; 
+        }
+        .loading-img { width: 150px; height: 150px; animation: bounce 0.5s infinite alternate; margin-bottom: 20px; }
+        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-20px); }}
+        .loaded { transform: translateY(-100%); pointer-events: none; }
+
+        /* --- 2. ANIMATIONS --- */
+        
+        /* Float Animasyonu (Yazılar ve Maskot için) */
+        .float-anim { animation: floatUpDown 3s ease-in-out infinite; display: block; }
+        @keyframes floatUpDown {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); } 
+        }
+
+        /* Meme Animasyonu */
+        .meme-anim { animation: floatMeme 3s ease-in-out infinite; display: block; }
+        @keyframes floatMeme {
+            0%, 100% { transform: translateY(0); } 
+            50% { transform: translateY(-15px); } 
+        }
+
+        /* TILT CARD */
+        .tilt-card { will-change: transform; transform-style: preserve-3d; perspective: 1000px; }
+        .tilt-card:hover { transition: transform 0.1s ease-out !important; }
+
+        /* --- 3. SCROLL REVEAL LOGIC --- */
+        /* Hero artik gizlenmeyecek, Reveal sınıfları sadece icerik bölümlerinde kalacak */
+        .reveal { opacity: 0; transform: translateY(50px); transition: all 0.8s ease; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        #back-to-top {
+            position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px;
+            background: var(--hot-pink); border: 4px solid var(--border-black); border-radius: 12px;
+            display: flex; justify-content: center; align-items: center; font-size: 2rem; color: white;
+            cursor: pointer; z-index: 9000; opacity: 0; pointer-events: none; transform: translateY(100px);
+            transition: all 0.5s ease; box-shadow: 5px 5px 0px var(--border-black);
+            overflow: hidden; 
+        }
+        #back-to-top.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
+        #back-to-top:hover { background: var(--lime-green); color: black; transform: translateY(-5px); }
+
+        /* --- MÜZİK KONTROL BUTONU --- */
+        #music-control {
+            position: fixed; top: 20px; right: 20px;
+            width: 50px; height: 50px;
+            background: var(--white);
+            border: 3px solid var(--border-black);
+            border-radius: 50%;
+            z-index: 9000;
+            display: none; 
+            justify-content: center; align-items: center;
+            font-size: 1.5rem; color: var(--border-black);
+            cursor: pointer;
+            box-shadow: 4px 4px 0px var(--border-black);
+            transition: all 0.2s;
+        }
+        #music-control:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--border-black); }
+        #music-control:hover { background: var(--shiba-orange); color: white; }
+
+        /* --- 4. LAYOUT & SECTIONS --- */
+        #main-content { position: relative; z-index: 10; width: 100%; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        h1 { font-size: 6rem; color: var(--shiba-orange); text-shadow: 6px 6px 0px var(--border-black); margin: 0; line-height: 1; letter-spacing: 2px; }
+        h2 { font-size: 4rem; text-shadow: 4px 4px 0px var(--border-black); color: white; text-align: center; margin-bottom: 50px; -webkit-text-stroke: 2px var(--border-black); }
+        
+        p, .contract-box span, .stat-value { word-wrap: break-word; overflow-wrap: break-word; }
+
+        /* HERO BÖLÜMÜ (Artik lap diye acilacak) */
+        .hero-section {
+            min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding-bottom: 50px; position: relative;
+            background: transparent;
+        }
+
+        .section-std { 
+            padding: 80px 0; 
+            background: transparent; 
+            border: none;
+        }
+        
+        .bg-contact { 
+            min-height: 80vh; 
+            display: flex; align-items: center; justify-content: center;
+            background: transparent;
+        }
+
+        /* --- 5. COMPONENTS --- */
+        .card-box { background: rgba(255, 255, 255, 0.95); border: 4px solid var(--border-black); box-shadow: 8px 8px 0px var(--border-black); padding: 20px; text-align: center; width: 100%; }
+
+        .mascot-wrapper { width: 300px; height: 340px; margin-bottom: 20px; }
+        .mascot-image { 
+            width: 100%; height: 100%; 
+            background: white; 
+            border: 5px solid var(--border-black); 
+            border-radius: 50%; 
+            display: flex; justify-content: center; align-items: center; 
+            box-shadow: 15px 15px 0px rgba(0,0,0,0.5); 
+            overflow: hidden; 
+        }
+        .mascot-image img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .contract-box { background: white; border: 4px solid var(--border-black); padding: 15px 30px; font-size: 1.5rem; transform: rotate(-2deg); margin-top: 30px; cursor: pointer; box-shadow: 8px 8px 0px rgba(0,0,0,0.5); max-width: 90%; word-break: break-all; }
+        .contract-box:hover { background: var(--hot-pink); color: white; transform: rotate(0deg); }
+
+        .buy-btn { margin-top:20px; text-decoration:none; background:var(--lime-green); color:black; padding:15px 30px; border:4px solid black; font-size:1.5rem; box-shadow:8px 8px 0 black; display: inline-block; }
+        .buy-btn:hover { background: white; transform: translate(-2px, -2px); }
+
+        .wp-btn { margin-top:15px; text-decoration:none; background:var(--white); color:black; padding:15px 30px; border:4px solid black; font-size:1.5rem; box-shadow:8px 8px 0 black; display: inline-block; }
+        .wp-btn:hover { background: var(--shiba-orange); color: white; transform: translate(-2px, -2px); }
+
+        .social-row { display: flex; gap: 15px; margin-top: 30px; flex-wrap: wrap; justify-content: center; }
+        .social-icon { width: 60px; height: 60px; background: white; border: 3px solid var(--border-black); border-radius: 12px; display: flex; justify-content: center; align-items: center; box-shadow: 5px 5px 0px var(--border-black); overflow: hidden; transition: all 0.2s; }
+        .social-icon img { width: 100%; height: 100%; object-fit: cover; }
+        .social-icon:hover { transform: scale(1.1); box-shadow: 2px 2px 0px var(--border-black); }
+
+        .tokenomics-grid { 
+            display: grid; 
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 15px; 
+        }
+        .stat-card { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 150px; }
+        .stat-title { font-size: 1.2rem; color: #666; margin-bottom: 5px; }
+        .stat-value { font-size: 1.4rem; color: var(--border-black); font-weight: bold; line-height: 1.1; white-space: nowrap; }
+
+        .roadmap-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; max-width: 1000px; margin: 0 auto; }
+        .phase-badge { background: var(--hot-pink); color: white; padding: 5px 20px; border: 3px solid var(--border-black); border-radius: 50px; display: inline-block; margin-bottom: 10px; }
+
+        .meme-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 40px; padding: 0 20px; }
+        
+        .meme-card { 
+            background: white; 
+            border: 4px solid var(--border-black); 
+            height: auto; 
+            aspect-ratio: 1 / 1; 
+            display: flex; justify-content: center; align-items: center; 
+            box-shadow: 8px 8px 0px var(--border-black); 
+            overflow: hidden; 
+        }
+        
+        .meme-card img { 
+            width: 100%; 
+            height: 105%; 
+            object-fit: cover !important; 
+        }
+
+        .howto-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; }
+        .step-card { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .step-number { background: var(--hot-pink); color: white; width: 50px; height: 50px; border: 3px solid black; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; }
+        
+        .faq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; max-width: 1000px; margin: 0 auto; }
+        .faq-card { text-align: left; }
+        .faq-q { color: var(--hot-pink); font-size: 1.4rem; margin-bottom: 10px; }
+
+        .contact-content { display: flex; justify-content: center; align-items: center; }
+        .contact-link { text-decoration: none; color: var(--border-black); font-size: 2rem; transition: color 0.2s; }
+        .contact-link:hover { color: var(--hot-pink); }
+
+        footer { background: var(--border-black); color: white; padding: 20px; text-align: center; }
+        .copy-feedback { position: absolute; top: -50px; left: 50%; transform: translateX(-50%); background: var(--border-black); color: white; padding: 5px 10px; border-radius: 5px; font-size: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+
+        @media (max-width: 768px) {
+            #loading-screen h1 { 
+                font-size: 1.8rem; 
+                white-space: nowrap; 
+            }
+            .tokenomics-grid { grid-template-columns: 1fr; }
+            h1 { font-size: 2.5rem; letter-spacing: 0px; }
+            h2 { font-size: 1.8rem; margin-bottom: 20px; }
+            p { font-size: 0.9rem; line-height: 1.4; } 
+            .section-std { padding: 30px 0; }
+            .container { padding: 10px; max-width: 95%; } 
+
+            @keyframes floatUpDown {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-5px); } 
+            }
+            @keyframes floatMeme {
+                0%, 100% { transform: translateY(0); } 
+                50% { transform: translateY(-5px); } 
+            }
+            .contract-box { font-size: 0.8rem; padding: 8px; width: 95%; } 
+            .buy-btn, .wp-btn { font-size: 1rem; padding: 10px 15px; width: 85%; } 
+            .roadmap-container, .faq-grid, .howto-grid, .meme-grid { grid-template-columns: 1fr; }
+            .mascot-wrapper { width: 140px; height: 160px; } 
+            .social-icon { width: 40px; height: 40px; } 
+            .social-row { gap: 8px; }
+            .contact-link { font-size: 1rem; }
+            #back-to-top { width: 45px; height: 45px; font-size: 1.2rem; bottom: 20px; right: 20px; }
+            .stat-value { font-size: 1rem; } 
+            .meme-grid { gap: 20px; } 
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loading-screen">
+        <img src="loading.png" alt="Loading" class="loading-img" onerror="this.src='https://placehold.co/512x512/FF9F43/000?text=Dog+PNG'">
+        <h1>WAKING UP HACHIKO...</h1>
+    </div>
+
+    <audio id="bg-music" loop>
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
+    
+    <div id="music-control" onclick="toggleMusic()">
+        <i class="fas fa-volume-mute" id="music-icon"></i>
+    </div>
+
+    <div id="back-to-top" onclick="scrollToTop()" class="tilt-card">
+        <div class="float-anim">⬆️</div>
+    </div>
+
+    <div id="main-content">
+        
+        <section class="hero-section">
+            <div class="mascot-wrapper tilt-card" id="hero-mascot">
+                <div class="mascot-image float-anim">
+                    <img src="mascot.png" alt="Hachiko Mascot">
+                </div>
+            </div>
+            
+            <h1 class="tilt-card">HACHIKO INU</h1>
+            <p class="tilt-card" style="font-size: 2rem; color: white; text-shadow: 2px 2px 0 #000; margin-top: -5px; font-weight:bold;">$HACHIKO</p>
+
+            <div class="contract-box tilt-card" onclick="copyContract()">
+                <span class="copy-feedback" id="copy-msg">COPIED!</span>
+                <span id="ca-text">0xcomingsoon</span>
+                <div style="font-size: 0.8rem; margin-top:5px; color:#555;">(CLICK TO COPY)</div>
+            </div>
+            
+            <a href="https://pancakeswap.finance/swap?inputCurrency=0xcomingsoon&outputCurrency=0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c%3Fref%3Dcoingecko&user=Coingecko&discount=0&perps=false&chain=bsc" target="_blank" class="buy-btn tilt-card">BUY ON UNISWAP 🥞</a>
+
+
+            <div class="social-row">
+                <a href="https://t.me/hachiko_bnb_chat" target="_blank" class="social-icon tilt-card"><img src="icon-tg.png" alt="Telegram"></a>
+                <a href="https://x.com/hachikoinucto" target="_blank" class="social-icon tilt-card"><img src="icon-x.png" alt="X"></a>
+                <a href="https://dexscreener.com/bsc/0xe6edc555061d1d9fe0145867b7ea7b07da840898" target="_blank" class="social-icon tilt-card"><img src="icon-ds.png" alt="DexScreener"></a>
+                <a href="https://www.dextools.io/app/bsc/pair-explorer/0xe6edc555061d1d9fe0145867b7ea7b07da840898" target="_blank" class="social-icon tilt-card"><img src="icon-dt.png" alt="Dextools"></a>
+            </div>
+        </section>
+
+        <section class="section-std">
+            <div class="container reveal">
+                <h2>WHY IS HE WAITING?</h2>
+                <div class="card-box tilt-card" style="max-width: 800px; margin: 0 auto; transform: rotate(1deg);">
+                    <div class="float-anim">
+                        <p style="font-size: 1.5rem;">
+                            Everyone thought Hachiko was waiting for his owner at the train station.<br><br>
+                            <strong>WRONG!</strong><br><br>
+                            He was actually waiting for the <strong>MEGA BULL RUN</strong>. The wait is finally over. 
+                            His owner is not coming, because YOU are the owner now!<br> 
+                            Unleash the loyalty, Hold the $HACHIKO.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-std">
+            <div class="container">
+                <h2 class="reveal">TOKENOMICS</h2>
+                <div class="tokenomics-grid">
+                    <div class="card-box stat-card tilt-card reveal">
+                        <div class="float-anim">
+                            <span class="stat-title">Total Supply</span>
+                            <span class="stat-value">1,000,000,000</span>
+                        </div>
+                    </div>
+                    <div class="card-box stat-card tilt-card reveal" style="transition-delay: 0.1s;">
+                        <div class="float-anim">
+                            <span class="stat-title">Circulating Supply</span>
+                            <span class="stat-value">945,984,257</span>
+                        </div>
+                    </div>
+                    <div class="card-box stat-card tilt-card reveal" style="transition-delay: 0.2s;">
+                        <div class="float-anim">
+                            <span class="stat-title">LP</span>
+                            <span class="stat-value">LOCKED</span>
+                        </div>
+                    </div>
+                    <div class="card-box stat-card tilt-card reveal" style="transition-delay: 0.3s;">
+                        <div class="float-anim">
+                            <span class="stat-title">Tax</span>
+                            <span class="stat-value">0% / 0%</span>
+                        </div>
+                    </div>
+                    <div class="card-box stat-card tilt-card reveal" style="transition-delay: 0.4s;">
+                        <div class="float-anim">
+                            <span class="stat-title">CHAIN</span>
+                            <span class="stat-value" style="color:#ff6b6b;">ETHEREUM</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-std">
+            <div class="container">
+                <h2 class="reveal">ROADMAP</h2>
+                <div class="roadmap-container">
+                    <div class="card-box roadmap-item tilt-card reveal">
+                        <div class="float-anim">
+                            <div class="phase-badge">PHASE 1</div>
+                            <h3>The Awakening</h3>
+                            <p>Website Launch<br>Social Media Setup<br>Community Building<br><strong>Four.meme Launch</strong></p>
+                        </div>
+                    </div>
+                    <div class="card-box roadmap-item tilt-card reveal" style="transition-delay: 0.2s;">
+                        <div class="float-anim">
+                            <div class="phase-badge">PHASE 2</div>
+                            <h3>Marketing Push</h3>
+                            <p>Influencer Raids<br><strong>DEX Listings (PancakeSwap)</strong><br>Trending on X<br>Verification all web3 platforms<br>Verification on swap platforms</p>
+                        </div>
+                    </div>
+                    <div class="card-box roadmap-item tilt-card reveal" style="transition-delay: 0.4s;">
+                        <div class="float-anim">
+                            <div class="phase-badge">PHASE 3</div>
+                            <h3>Global Recognition</h3>
+                            <p>
+                                Coingecko listing & Verification<br>
+                                Coinmarketcap listing verification<br>
+                                Binance square community page + 1k followers<br>
+                                Cmc community page + 1k followers<br>
+                                10K followers on X 5K members on Telegram<br>
+                                Alpha listings (Gate Alpha, Mexc Alpha)<br>
+                                T1 Infleuncers marketing
+                            </p>
+                        </div>
+                    </div>
+                    <div class="card-box roadmap-item tilt-card reveal" style="transition-delay: 0.6s;">
+                        <div class="float-anim">
+                            <div class="phase-badge">PHASE 4</div>
+                            <h3>Exchange Era</h3>
+                            <p>CEX Listings (MEXC, Gate.io)<br>Strategic Partnerships<br>Global Billboards</p>
+                        </div>
+                    </div>
+                    <div class="card-box roadmap-item tilt-card reveal" style="transition-delay: 0.8s;">
+                        <div class="float-anim">
+                            <div class="phase-badge">PHASE 5</div>
+                            <h3>Hachiko Utilities</h3>
+                            <p>Hachi-Game (P2E)<br>Exclusive NFT Collection<br>Merch Store Launch</p>
+                        </div>
+                    </div>
+                    <div class="card-box roadmap-item tilt-card reveal" style="transition-delay: 1s;">
+                        <div class="float-anim">
+                            <div class="phase-badge">PHASE 6</div>
+                            <h3>To The Moon</h3>
+                            <p>Tier 1 CEX Listing (Binance?)<br>Hachiko Blockchain<br>World Domination 🚀</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-std">
+            <div class="container">
+                <h2 class="reveal">MEME GALLERY</h2>
+                <div class="meme-grid">
+                    <div class="meme-card tilt-card reveal">
+                        <img src="meme1.png" alt="Meme 1" class="meme-anim">
+                    </div>
+                    <div class="meme-card tilt-card reveal" style="transition-delay: 0.2s;">
+                        <img src="meme2.png" alt="Meme 2" class="meme-anim">
+                    </div>
+                    <div class="meme-card tilt-card reveal" style="transition-delay: 0.4s;">
+                        <img src="meme3.png" alt="Meme 3" class="meme-anim">
+                    </div>
+                    <div class="meme-card tilt-card reveal" style="transition-delay: 0.6s;">
+                        <img src="meme4.png" alt="Meme 4" class="meme-anim">
+                    </div>
+                    <div class="meme-card tilt-card reveal" style="transition-delay: 0.8s;">
+                        <img src="meme5.png" alt="Meme 5" class="meme-anim">
+                    </div>
+                    <div class="meme-card tilt-card reveal" style="transition-delay: 1s;">
+                        <img src="meme6.png" alt="Meme 6" class="meme-anim">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-std">
+            <div class="container">
+                <h2 class="reveal">HOW TO BUY?</h2>
+                <div class="howto-grid">
+                    <div class="card-box step-card tilt-card reveal">
+                        <div class="float-anim">
+                            <div class="step-number">1</div>
+                            <h3>Create Wallet</h3>
+                            <p>Download Metamask or Trust Wallet from the app store.</p>
+                        </div>
+                    </div>
+                    <div class="card-box step-card tilt-card reveal" style="transition-delay: 0.2s;">
+                        <div class="float-anim">
+                            <div class="step-number">2</div>
+                            <h3>Get BNB</h3>
+                            <p>Purchase ETH and send it to your wallet.</p>
+                        </div>
+                    </div>
+                    <div class="card-box step-card tilt-card reveal" style="transition-delay: 0.4s;">
+                        <div class="float-anim">
+                            <div class="step-number">3</div>
+                            <h3>Go to PancakeSwap</h3>
+                            <p>Connect your wallet to UNISWAP and paste our contract address.</p>
+                        </div>
+                    </div>
+                    <div class="card-box step-card tilt-card reveal" style="transition-delay: 0.6s;">
+                        <div class="float-anim">
+                            <div class="step-number">4</div>
+                            <h3>Swap for $HACHIKO</h3>
+                            <p>Set slippage to 1% (or auto) and confirm the swap. Welcome to the family!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-std">
+            <div class="container">
+                <h2 class="reveal">FAQ</h2>
+                <div class="faq-grid">
+                    <div class="card-box faq-card tilt-card reveal">
+                        <div class="float-anim">
+                            <div class="faq-q">Q: Is Liquidity Locked?</div>
+                            <p>A: Yes! Liquidity is 100% burned/locked forever. We can't touch it even if we wanted to. Safu!</p>
+                        </div>
+                    </div>
+                    <div class="card-box faq-card tilt-card reveal" style="transition-delay: 0.2s;">
+                        <div class="float-anim">
+                            <div class="faq-q">Q: What are the Taxes?</div>
+                            <p>A: Zero. Nada. 0% Buy and 0% Sell. We believe in true freedom for trading.</p>
+                        </div>
+                    </div>
+                    <div class="card-box faq-card tilt-card reveal" style="transition-delay: 0.4s;">
+                        <div class="float-anim">
+                            <div class="faq-q">Is this Financial Advice?</div>
+                            <p>A: No sir! This is a meme coin for entertainment purposes. Always DYOR (Do Your Own Research).</p>
+                        </div>
+                    </div>
+                    <div class="card-box faq-card tilt-card reveal" style="transition-delay: 0.6s;">
+                        <div class="float-anim">
+                            <div class="faq-q">Q: When Moon?</div>
+                            <p>A: We are working hard every day. With your help and Hachiko's loyalty, Moon is imminent! 🚀</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-std bg-contact">
+            <div class="container">
+                <h2 class="reveal">CONTACT</h2>
+                <div class="card-box contact-content tilt-card reveal" style="max-width: 600px; margin: 0 auto;">
+                    <div class="float-anim">
+                        <a href="/cdn-cgi/l/email-protection#5b32353d341b333a383332303475283928" class="contact-link"><span class="__cf_email__" data-cfemail="c3aaada5ac83aba2a0abaaa8acedb0a1b0">[email&#160;protected]</span></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>© 2026 HACHIKO INU ($HACHIKO) - NOT FINANCIAL ADVICE (DYOR)</p>
+        </footer>
+    </div>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        function openSite() {
+            const loader = document.getElementById('loading-screen');
+            if(loader) {
+                loader.classList.add('loaded');
+                setTimeout(() => { loader.style.display = 'none'; }, 1000);
+                
+                const music = document.getElementById('bg-music');
+                const btn = document.getElementById('music-control');
+                const icon = document.getElementById('music-icon');
+                
+                btn.style.display = 'flex';
+                music.volume = 0.4;
+                
+                var playPromise = music.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.then(_ => {
+                        icon.classList.remove('fa-volume-mute');
+                        icon.classList.add('fa-volume-up');
+                    }).catch(error => {
+                        const enableAudio = () => {
+                            music.play().then(() => {
+                                icon.classList.remove('fa-volume-mute');
+                                icon.classList.add('fa-volume-up');
+                                window.removeEventListener('touchstart', enableAudio);
+                                window.removeEventListener('scroll', enableAudio);
+                            });
+                        };
+                        window.addEventListener('touchstart', enableAudio);
+                        window.addEventListener('scroll', enableAudio);
+                    });
+                }
+            }
+        }
+        
+        function toggleMusic() {
+            const music = document.getElementById('bg-music');
+            const icon = document.getElementById('music-icon');
+            
+            if(music.paused) {
+                music.play();
+                icon.classList.remove('fa-volume-mute');
+                icon.classList.add('fa-volume-up');
+            } else {
+                music.pause();
+                icon.classList.remove('fa-volume-up');
+                icon.classList.add('fa-volume-mute');
+            }
+        }
+
+        window.addEventListener('load', () => { setTimeout(openSite, 1000); });
+        setTimeout(openSite, 5000); 
+
+        window.addEventListener('scroll', () => {
+            const scrollY = window.scrollY;
+            const windowHeight = window.innerHeight;
+
+            const reveals = document.querySelectorAll(".reveal");
+            for (var i = 0; i < reveals.length; i++) {
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                var elementVisible = 50; 
+                if (elementTop < windowHeight - elementVisible) {
+                    reveals[i].classList.add("active");
+                }
+            }
+
+            const topBtn = document.getElementById('back-to-top');
+            if(scrollY > 300) { topBtn.classList.add('show'); } 
+            else { topBtn.classList.remove('show'); }
+        });
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        const tiltElements = document.querySelectorAll('.tilt-card');
+        tiltElements.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left; 
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = (centerY - y) / 10;
+                const rotateY = (x - centerX) / 10;
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = ''; 
+            });
+        });
+
+        function copyContract() {
+            const caText = document.getElementById("ca-text").innerText;
+            navigator.clipboard.writeText(caText).then(() => {
+                const feedback = document.getElementById("copy-msg");
+                feedback.style.opacity = "1";
+                setTimeout(() => { feedback.style.opacity = "0"; }, 1500);
+            });
+        }
+
+        function createRain() {
+            const bone = document.createElement('i');
+            bone.classList.add('fas', 'fa-bone', 'bone-rain');
+            bone.style.left = Math.random() * 100 + 'vw';
+            bone.style.animationDuration = Math.random() * 3 + 2 + 's';
+            bone.style.opacity = Math.random() * 0.8 + 0.8;
+            bone.style.fontSize = Math.random() * 15 + 15 + 'px';
+            document.body.appendChild(bone);
+            setTimeout(() => { bone.remove(); }, 5000);
+        }
+
+        setInterval(createRain, 300);
+
+    </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"version":"2024.11.0","token":"6df052b2f9ea4094a18f6adde51be442","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
